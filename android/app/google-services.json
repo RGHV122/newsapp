@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "914168052569",
+    "firebase_url": "https://newsnow-5abfa.firebaseio.com",
+    "project_id": "newsnow-5abfa",
+    "storage_bucket": "newsnow-5abfa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:914168052569:android:77b7c92ea11e36bb766a48",
+        "android_client_info": {
+          "package_name": "com.android.newsapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "914168052569-754897g8oocb2i51so25dtf8lj9d12h4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQCwxRtCtF1yC0WXOoDSYc69BrbAfhQ1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "914168052569-754897g8oocb2i51so25dtf8lj9d12h4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
