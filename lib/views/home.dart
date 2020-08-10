@@ -4,9 +4,10 @@ import 'package:location_permissions/location_permissions.dart';
 import 'package:newsapp/model/article_model.dart';
 import 'package:newsapp/views/article_view.dart';
 import 'package:newsapp/views/news.dart';
-import 'package:newsapp/services/admob_service.dart';
-import 'package:flutter_native_admob/flutter_native_admob.dart';
-import 'package:flutter_native_admob/native_admob_controller.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'dart:async';
+
+const String testDevice = "81FD9118B38595CB3928A88F4FFD39EE";
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -15,19 +16,49 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<ArticleModel> articles = new List<ArticleModel>();
   bool _loading=true;
-  final ams=AdMobService();
-  final _nativeAdController = NativeAdmobController();
+  static String bannerId="ca-app-pub-6298255171961713/9076982543";
+  static String appId="ca-app-pub-6298255171961713~6833962582";
+  static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
+    testDevices: testDevice != null ? <String>[testDevice] : null,
+    nonPersonalizedAds: false,
+    keywords: <String>['Game', 'Mario'],
+  );
+
+
+  BannerAd _bannerAd;
+  BannerAd createBannerAd() {
+    return BannerAd(
+      adUnitId: bannerId,
+      size: AdSize.banner,
+      targetingInfo: targetingInfo,
+      listener: (MobileAdEvent event) {
+        print("BannerAd event $event");
+      },
+
+    );
+  }
+
+
+
 
   @override
   void initState() {
     // TODO: implement initState
+    FirebaseAdMob.instance.initialize(appId: appId);
+    _bannerAd = createBannerAd()..load()..show();
     super.initState();
     getNews();
   }
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
+  }
+
   Future<void> getLocationpermission() async{
     PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
     if(permission!=PermissionStatus.granted){
-      PermissionStatus permission = await LocationPermissions().requestPermissions();
+       await LocationPermissions().requestPermissions();
     }
   }
   getNews() async{
@@ -60,44 +91,27 @@ class _HomeState extends State<Home> {
           child: CircularProgressIndicator(),
         ),
       ):SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
+        child: Container(
 
-            Container(
-
-              padding: EdgeInsets.only(top: 16),
-               child: Column(
-                 children: <Widget>[
-                   Container(
-                     height: 90,
-                     padding: EdgeInsets.all(10),
-                     margin: EdgeInsets.only(bottom: 20.0),
-                     child: new NativeAdmob(
-                       // Your ad unit id
-                       adUnitID: ams.getBannerAdId(),
-                       error: Text("Failed to load the ad"),
-                       controller: _nativeAdController,
-                       type: NativeAdmobType.banner,
-                     ),
-                   ),
-                   Container(
-                     child: ListView.builder(
-                         itemCount:articles.length,
-                         shrinkWrap: true,
-                         physics: ClampingScrollPhysics(),
-                         itemBuilder: (context,index) {
-                           return BlogTile(
-                             imageUrl: articles[index].urlToImage,
-                             title: articles[index].title,
-                             description: articles[index].description,
-                             url: articles[index].url,
-                           );
-                         }),
-                   ),
-                 ],
+          padding: EdgeInsets.only(top: 16),
+           child: Column(
+             children: <Widget>[
+               Container(
+                 child: ListView.builder(
+                     itemCount:articles.length,
+                     shrinkWrap: true,
+                     physics: ClampingScrollPhysics(),
+                     itemBuilder: (context,index) {
+                       return BlogTile(
+                         imageUrl: articles[index].urlToImage,
+                         title: articles[index].title,
+                         description: articles[index].description,
+                         url: articles[index].url,
+                       );
+                     }),
                ),
-            ),
-          ],
+             ],
+           ),
         ),
       ),
 

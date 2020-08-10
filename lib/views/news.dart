@@ -10,7 +10,7 @@ class News{
 
   Future<void> getlocation() async{
 
-    if(Geolocator().isLocationServiceEnabled() == true){
+    if((await Geolocator().isLocationServiceEnabled()) == true){
       GeolocationStatus locationStatus  = await Geolocator().checkGeolocationPermissionStatus();
       if(locationStatus == GeolocationStatus.granted){
         Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.lowest);
