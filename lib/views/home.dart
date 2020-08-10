@@ -20,19 +20,21 @@ class _HomeState extends State<Home> {
   static String appId="ca-app-pub-6298255171961713~6833962582";
   static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
     testDevices: testDevice != null ? <String>[testDevice] : null,
-    nonPersonalizedAds: false,
-    keywords: <String>['Game', 'Mario'],
+    nonPersonalizedAds: true,
+
   );
 
 
   BannerAd _bannerAd;
   BannerAd createBannerAd() {
     return BannerAd(
-      adUnitId: bannerId,
+      adUnitId: BannerAd.testAdUnitId,
       size: AdSize.banner,
       targetingInfo: targetingInfo,
+
       listener: (MobileAdEvent event) {
         print("BannerAd event $event");
+
       },
 
     );
@@ -71,6 +73,15 @@ class _HomeState extends State<Home> {
       _loading=false;
     });
   }
+  upDateNews() async{
+    News newslistget = News();
+    await newslistget.getNews();
+    articles = newslistget.news;
+    setState(() {
+      _loading=false;
+    });
+
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,7 +91,7 @@ class _HomeState extends State<Home> {
           children: <Widget>[
             Text("News"),
             Text("Now",style: TextStyle(
-              color: Colors.teal,
+              color: Colors.amber,
             )),
           ],
         ),
@@ -90,28 +101,50 @@ class _HomeState extends State<Home> {
         child: Container(
           child: CircularProgressIndicator(),
         ),
-      ):SingleChildScrollView(
-        child: Container(
+      ):GestureDetector(
+        onHorizontalDragUpdate: (details) {
+            if (details.delta.dx < 40) {
+              newsapipage+=1;
+              setState(() {
+                _loading=false;
+              });
+              upDateNews();
+            }
+            else if (details.delta.dx > 40) {
+              if(newsapipage>1){
+                newsapipage-=1;
+                setState(() {
+                  _loading=false;
+                });
+                upDateNews();
 
-          padding: EdgeInsets.only(top: 16),
-           child: Column(
-             children: <Widget>[
-               Container(
-                 child: ListView.builder(
-                     itemCount:articles.length,
-                     shrinkWrap: true,
-                     physics: ClampingScrollPhysics(),
-                     itemBuilder: (context,index) {
-                       return BlogTile(
-                         imageUrl: articles[index].urlToImage,
-                         title: articles[index].title,
-                         description: articles[index].description,
-                         url: articles[index].url,
-                       );
-                     }),
-               ),
-             ],
-           ),
+              }
+
+            }
+          },
+        child: SingleChildScrollView(
+          child: Container(
+
+            padding: EdgeInsets.only(top: 35),
+             child: Column(
+               children: <Widget>[
+                 Container(
+                   child: ListView.builder(
+                       itemCount:articles.length,
+                       shrinkWrap: true,
+                       physics: ClampingScrollPhysics(),
+                       itemBuilder: (context,index) {
+                         return BlogTile(
+                           imageUrl: articles[index].urlToImage,
+                           title: articles[index].title,
+                           description: articles[index].description,
+                           url: articles[index].url,
+                         );
+                       }),
+                 ),
+               ],
+             ),
+          ),
         ),
       ),
 
@@ -151,9 +184,9 @@ class BlogTile extends StatelessWidget {
             SizedBox(height: 8,),
             Text(description,style: TextStyle(
               color: Colors.black54,
-
             ),
               ),
+            SizedBox(height: 30,),
           ],
         ),
       ),

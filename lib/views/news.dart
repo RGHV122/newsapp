@@ -4,6 +4,7 @@ import 'package:newsapp/model/article_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:geocoder/geocoder.dart';
 
+int newsapipage=1;
 class News{
   String country="in";
   List<ArticleModel> news=[];
@@ -28,7 +29,7 @@ class News{
     }
   }
   Future<void> getNews() async{
-    String url="https://newsapi.org/v2/top-headlines?country=$country&pageSize=5&apiKey=b90becb725d14144a04558f5526a665b";
+    String url="https://newsapi.org/v2/top-headlines?country=$country&pageSize=5&page=$newsapipage&apiKey=b90becb725d14144a04558f5526a665b";
     var response = await http.get(url);
     print("got news data");
     var jsonData = jsonDecode(response.body);
