@@ -6,6 +6,7 @@ import 'package:newsapp/views/article_view.dart';
 import 'package:newsapp/views/news.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'dart:async';
+import 'dart:io';
 
 const String testDevice = "81FD9118B38595CB3928A88F4FFD39EE";
 class Home extends StatefulWidget {
@@ -18,6 +19,9 @@ class _HomeState extends State<Home> {
   bool _loading=true;
   static String bannerId="ca-app-pub-6298255171961713/9076982543";
   static String appId="ca-app-pub-6298255171961713~6833962582";
+  bool internet_connected=true;
+
+
   static const MobileAdTargetingInfo targetingInfo = MobileAdTargetingInfo(
     testDevices: testDevice != null ? <String>[testDevice] : null,
     nonPersonalizedAds: true,
@@ -28,7 +32,7 @@ class _HomeState extends State<Home> {
   BannerAd _bannerAd;
   BannerAd createBannerAd() {
     return BannerAd(
-      adUnitId: BannerAd.testAdUnitId,
+      adUnitId: bannerId,
       size: AdSize.banner,
       targetingInfo: targetingInfo,
 
@@ -46,6 +50,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     // TODO: implement initState
+
     FirebaseAdMob.instance.initialize(appId: appId);
     _bannerAd = createBannerAd()..load()..show();
     super.initState();
@@ -64,18 +69,31 @@ class _HomeState extends State<Home> {
     }
   }
   getNews() async{
-    await getLocationpermission();
-    News newslistget = News();
-    await newslistget.getlocation();
-    await newslistget.getNews();
-    articles = newslistget.news;
-    setState(() {
-      _loading=false;
-    });
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        await getLocationpermission();
+        News newslistget = News();
+        await newslistget.getlocation();
+        await newslistget.getNewsfromapi();
+        articles = newslistget.news;
+        internet_connected=true;
+        setState(() {
+          _loading=false;
+        });
+      }
+    } on SocketException catch (_) {
+      internet_connected=false;
+      setState(() {
+        _loading=false;
+      });
+    }
+    
+
   }
   upDateNews() async{
     News newslistget = News();
-    await newslistget.getNews();
+    await newslistget.getNewsfromapi();
     articles = newslistget.news;
     setState(() {
       _loading=false;
@@ -101,32 +119,31 @@ class _HomeState extends State<Home> {
         child: Container(
           child: CircularProgressIndicator(),
         ),
-      ):GestureDetector(
+      ):internet_connected?GestureDetector(
         onHorizontalDragUpdate: (details) {
-            if (details.delta.dx < 40) {
+            if (details.delta.dx < 80) {
               newsapipage+=1;
               setState(() {
-                _loading=false;
+                _loading=true;
               });
               upDateNews();
             }
-            else if (details.delta.dx > 40) {
+            else if (details.delta.dx > -80) {
               if(newsapipage>1){
                 newsapipage-=1;
                 setState(() {
-                  _loading=false;
+                  _loading=true;
                 });
                 upDateNews();
 
               }
-
             }
           },
         child: SingleChildScrollView(
           child: Container(
 
             padding: EdgeInsets.only(top: 35),
-             child: Column(
+             child: (errorgettingnews==false)? Column(
                children: <Widget>[
                  Container(
                    child: ListView.builder(
@@ -141,12 +158,21 @@ class _HomeState extends State<Home> {
                            url: articles[index].url,
                          );
                        }),
-                 ),
+                   ),
+
                ],
-             ),
+             ):Center(
+               child: Container(
+                 child: Text("Error getting news Data Api limit Reached"),
+               ),
+             )
           ),
         ),
-      ),
+      ):Center(
+        child: Container(
+          child: Text("Connect to internet"),
+        ),
+      )
 
     );
   }

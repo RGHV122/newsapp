@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:newsapp/views/home.dart';
+import 'package:newsapp/views/news.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  newsapipage=1;
   runApp(MyApp());
 }
 
